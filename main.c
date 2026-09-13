@@ -3,29 +3,28 @@
 #include <stdbool.h>
 
 char* cleanedString(char* s) {
-  s[strlen(s) - 1] = '\0';
+  s[strcspn(s, "\n")] = '\0';
   return s;
 }
 
-char greetUser() {
+static void greetUser() {
   bool hasName = false;
   do {
     fflush(stdin);
   printf("Hello, enter your first name: ");
   char firstName[256];
-  fgets(firstName, sizeof(firstName), stdin);
-  fflush(stdin);
+  if (fgets(firstName, sizeof(firstName), stdin) == NULL) {
+            return;
+        }
 
   printf("Thank you, %s, now enter your last name: ", cleanedString(firstName));
   char lastName[256];
   fgets(lastName, sizeof(lastName), stdin);
-  fflush(stdin);
 
   printf("Your name is: %s %s, is this true? [y] or [n]: ", firstName, cleanedString(lastName));
-  char choice[0];
+  char choice[3];
   fgets(choice, sizeof(choice), stdin);
 
-  fflush(stdin);
   printf("You chose %c\n", choice[0]);
   
   if (choice[0] == 'y') {
@@ -39,7 +38,7 @@ char greetUser() {
 }
 
 
-int main() {
+int main(void) {
 
   greetUser();
 
