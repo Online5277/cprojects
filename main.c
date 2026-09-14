@@ -1,3 +1,4 @@
+#include "stateMachine.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -41,7 +42,8 @@ int main(void)
     if (!greetUser(firstName, sizeof firstName, lastName, sizeof lastName))
         return 1;
 
-    printf("%s %s", firstName, lastName);
+    //    printf("%s %s", firstName, lastName);
+    fishingGame(firstName, lastName);
 
     return 0;
 }
