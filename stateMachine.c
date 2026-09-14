@@ -25,6 +25,9 @@ void fishingGame(char *firstName, char *lastName)
     int fishingExperience = 0;
     int cookingExperience = 0;
 
+    int upper_bound = 3;
+    int lower_bound = 1;
+
     printf("Hello, %s %s. It's time to fish.\n", firstName, lastName);
 
     while (state != STATE_QUIT)
@@ -89,8 +92,6 @@ void fishingGame(char *firstName, char *lastName)
             break;
         case STATE_CASTING:
             puts("You cast your rod!");
-            int upper_bound = 3;
-            int lower_bound = 1;
 
             sleepSeconds((unsigned)(rand() % (upper_bound - lower_bound + 1) +
                                     lower_bound));
