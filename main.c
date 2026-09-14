@@ -3,9 +3,6 @@
 #include <stdio.h>
 #include <string.h>
 
-// gcc -std=c17 -Wall -Wextra -Wpedantic -Wconversion -Wshadow -Werror main.c -o
-// main && .\main
-
 char *cleanedString(char *s)
 {
     s[strcspn(s, "\n")] = '\0';
