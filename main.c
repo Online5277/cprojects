@@ -2,7 +2,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 char *cleanedString(char *s)
 {
@@ -38,6 +40,7 @@ static bool greetUser(char *fn, int fnSize, char *ln, int lnSize)
 int main(void)
 {
     char firstName[256], lastName[256];
+    srand((unsigned)time(NULL));
     // start of program
     if (!greetUser(firstName, sizeof firstName, lastName, sizeof lastName))
         return 1;

@@ -1,6 +1,8 @@
 #include "stateMachine.h"
+#include "sleep.h"
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 typedef enum
 {
@@ -78,11 +80,6 @@ void fishingGame(char *firstName, char *lastName)
                         state = STATE_IDLE;
                     }
                 }
-                else
-                {
-                    printf("You don't have bait!\n");
-                    state = STATE_QUIT;
-                }
             }
             else
             {
@@ -91,15 +88,15 @@ void fishingGame(char *firstName, char *lastName)
             }
             break;
         case STATE_CASTING:
-            printf("You cast your rod!\n");
-            printf("Press \'enter\' to jiggle your bait to entice a fish.\n");
-            if (getchar())
-            {
-                printf("A fish has biten your bait! Press \'enter\' to reel it "
-                       "in!\n");
-                if (getchar())
-                    state = STATE_REELING;
-            }
+            puts("You cast your rod!");
+            int upper_bound = 3;
+            int lower_bound = 1;
+
+            sleepSeconds((unsigned)(rand() % (upper_bound - lower_bound + 1) +
+                                    lower_bound));
+            puts("A fish is on the line. Press \'enter\' to reel it in!");
+            getchar();
+            state = STATE_REELING;
             break;
         case STATE_REELING:
             //            printf("Insert logic for fish minigame here\n");
@@ -113,11 +110,16 @@ void fishingGame(char *firstName, char *lastName)
 
         case STATE_COOKING:
             if (fishInventory == 0)
-                printf("What did you even plan on cooking? Get to fishing!\n");
+                puts("What did you even plan on cooking? Get to fishing!");
 
-            while (fishInventory > 0)
+            if (fishInventory > 0)
             {
-                printf("You cook a fish on the grill... [+10 Cooking XP]\n");
+                puts("You put the fish on the grill");
+                sleepSeconds(1);
+                puts("It sizzles...");
+                sleepSeconds(1);
+                puts("Done! You have cooked a fish on the grill. [+10 Cooking "
+                     "XP]\n");
                 fishInventory--;
                 cookingExperience += 10;
                 printf("Cooking XP: %d\n", cookingExperience);
