@@ -9,7 +9,7 @@ static void sleepSeconds(unsigned seconds) { Sleep(seconds * 1000U); }
 
 #include <unistd.h>
 
-static void sleepSeconds(unsigned seconds) { void(sleep)(seconds); }
+static void sleepSeconds(unsigned seconds) { (void)sleep(seconds); }
 
 #else
 #error nL&nW
