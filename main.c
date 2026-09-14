@@ -39,11 +39,11 @@ static void greetUser(char *fn, char *ln)
             return;
         }
 
-        printf("You chose %c\n", choice[0]);
+        printf("You chose: %c.\n", choice[0]);
 
         choice[0] == 'y' ? hasName = true : false;
-        strcpy_s(fn, sizeof(firstName), firstName);
-        strcpy_s(ln, sizeof(lastName), lastName);
+        strncpy(fn, firstName, 256);
+        strncpy(ln, lastName, 256);
     } while (!hasName);
 }
 
