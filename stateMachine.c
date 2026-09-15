@@ -22,8 +22,8 @@ void fishingGame(char *firstName, char *lastName)
     bool rodHasBait = false;
     int baitCount = 10;
     int fishInventory = 0;
-    int fishingExperience = 0;
-    int cookingExperience = 0;
+    float fishingExperience = 0.0f;
+    float cookingExperience = 0.0f;
 
     int upper_bound = 3;
     int lower_bound = 1;
@@ -104,7 +104,7 @@ void fishingGame(char *firstName, char *lastName)
             printf("You have caught a fish!\n");
             fishInventory++;
             fishingExperience += 10;
-            printf("Fishing XP: %d\n", fishingExperience);
+            printf("Fishing XP: %.1f\n", fishingExperience);
             rodHasBait = false;
             state = STATE_IDLE;
             break;
@@ -123,7 +123,7 @@ void fishingGame(char *firstName, char *lastName)
                      "XP]\n");
                 fishInventory--;
                 cookingExperience += 10;
-                printf("Cooking XP: %d\n", cookingExperience);
+                printf("Cooking XP: %.1f\n", cookingExperience);
             }
             state = STATE_IDLE;
             break;
