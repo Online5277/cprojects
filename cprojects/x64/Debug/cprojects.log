@@ -1,7 +1,0 @@
-﻿  main.c
-C:\Users\user\projects\c\cprojects\main.c(35,5): warning C4013: 'fishingGameInit' undefined; assuming extern returning int
-C:\Users\user\projects\c\cprojects\main.c(72,17): warning C4013: 'fishingGameUpdate' undefined; assuming extern returning int
-C:\Users\user\projects\c\cprojects\main.c(112,13): warning C4013: 'fishingGameDraw' undefined; assuming extern returning int
-  stateMachine.c
-  Generating Code...
-  cprojects.vcxproj -> C:\Users\user\projects\c\cprojects\x64\Debug\cprojects.exe

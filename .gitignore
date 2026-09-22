@@ -1,2 +1,34 @@
-main
-main.exe
+# Runtime data
+/data.json
+
+# Compiled binaries and intermediate files
+/main
+*.exe
+*.o
+*.obj
+*.pdb
+*.ilk
+*.idb
+*.ipch
+*.tlog
+*.lastbuildstate
+*.recipe
+
+# Build directories
+.vs/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+out/
+
+# Visual Studio user-specific files
+*.suo
+*.user
+*.VC.db
+*.VC.opendb
+
+# OS-generated files
+.DS_Store
+Thumbs.db
