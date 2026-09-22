@@ -1,10 +1,11 @@
+#include "stateMachine.h"
+#include "fileHelper.h"
 #include <raylib.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
 
 #define MAX_INPUT_CHARS 31
-#define MAX_MESSAGES 5
 
 typedef enum
 {
@@ -23,68 +24,74 @@ int main(void)
     char buffer[MAX_INPUT_CHARS + 1] = "";
     char firstName[MAX_INPUT_CHARS + 1] = "";
     char lastName[MAX_INPUT_CHARS + 1] = "";
-    char messages[MAX_MESSAGES][MAX_INPUT_CHARS + 1] = {{0}};
     int letterCount = 0;
-    int messageCount = 0;
     int framesCounter = 0;
 
-    InitWindow(screenWidth, screenHeight, "Fishing Game");
+    if (checkName(firstName, sizeof firstName, lastName, sizeof lastName))
+        {
+            appState = START_GAME;
+        }
+
+    InitWindow(screenWidth, screenHeight, "cprojects");
     SetExitKey(KEY_NULL);
     SetTargetFPS(60);
 
+    fishingGameInit();
+
     while (!WindowShouldClose())
     {
-        int key = GetCharPressed();
-        while (key > 0)
-        {
-            if (key >= 32 && key <= 125 && letterCount < MAX_INPUT_CHARS)
-            {
-                buffer[letterCount] = (char)key;
-                letterCount++;
-                buffer[letterCount] = '\0';
-            }
+        // file helper logic
 
-            key = GetCharPressed();
-        }
-
-        if (IsKeyPressed(KEY_BACKSPACE) && letterCount > 0)
+        if (appState != START_GAME)
         {
-            letterCount--;
-            buffer[letterCount] = '\0';
-        }
-
-        if (IsKeyPressed(KEY_ENTER) && letterCount > 0)
-        {
-            if (appState == ASK_FIRST_NAME)
+            int key = GetCharPressed();
+            while (key > 0)
             {
-                memcpy(firstName, buffer, (size_t)letterCount + 1U);
-                appState = ASK_LAST_NAME;
-            }
-            else if (appState == ASK_LAST_NAME)
-            {
-                memcpy(lastName, buffer, (size_t)letterCount + 1U);
-                appState = START_GAME;
-            }
-            else
-            {
-                if (messageCount == MAX_MESSAGES)
+                if (key >= 32 && key <= 125 && letterCount < MAX_INPUT_CHARS)
                 {
-                    memmove(messages[0], messages[1],
-                            sizeof messages[0] * (MAX_MESSAGES - 1U));
-                    messageCount--;
+                    buffer[letterCount] = (char)key;
+                    letterCount++;
+                    buffer[letterCount] = '\0';
                 }
 
-                memcpy(messages[messageCount], buffer,
-                       (size_t)letterCount + 1U);
-                messageCount++;
-            }
+                key = GetCharPressed();
+            } // get key inputs for strings (Goes inside of the buffer)
 
-            buffer[0] = '\0';
-            letterCount = 0;
+            if (IsKeyPressed(KEY_BACKSPACE) && letterCount > 0)
+            {
+                letterCount--;
+                buffer[letterCount] = '\0';
+            } // decrement letterCount because we deleted a letter.
+	      // set buffer at letterCount to '\0' since raylib
+	      // reads strings until '\0'
+
+            if (IsKeyPressed(KEY_ENTER) && letterCount > 0)// check if letterCount is more than 0 to not return save empty string
+            {
+                if (appState == ASK_FIRST_NAME)
+                {
+		  memcpy(firstName, buffer, (size_t)letterCount + 1U); // (size_t) + 1U[unsigned]) makes memcpy safe 
+		  appState = ASK_LAST_NAME; // saved firstName, transition to lastName
+                }
+                else // no `else if` since we only get first and last name
+                {
+                    memcpy(lastName, buffer, (size_t)letterCount + 1U);
+
+                    jsonInit(firstName, lastName);
+                    appState = START_GAME;
+
+                }
+
+                buffer[0] = '\0'; // set buffer[0] to '\0' so that raylib doesn't read it maybe?
+                letterCount = 0; // no more letters to show.
+            }
+        }
+        else // appState = START_GAME so we call fishingGameUpdate()
+        {
+            fishingGameUpdate();
         }
 
-        bool mouseOnText =
-            CheckCollisionPointRec(GetMousePosition(), textBox);
+        bool mouseOnText = appState != START_GAME /*<----  probably AI slop*/ &&
+                           CheckCollisionPointRec(GetMousePosition(), textBox);
         SetMouseCursor(mouseOnText ? MOUSE_CURSOR_IBEAM : MOUSE_CURSOR_DEFAULT);
         framesCounter++;
 
@@ -101,29 +108,29 @@ int main(void)
             DrawText(firstName, 50, 85, 30, DARKBLUE);
             DrawText("What is your last name?", 50, 140, 24, BLACK);
         }
-        else
+        else if (appState == START_GAME)
         {
             DrawText(TextFormat("Welcome, %s %s!", firstName, lastName), 50,
                      35, 30, DARKBLUE);
-            DrawText("Type a message and press Enter:", 50, 80, 20,
-                     DARKGRAY);
 
-            for (int i = 0; i < messageCount; i++)
-                DrawText(messages[i], 50, 120 + i * 36, 24, BLACK);
+            fishingGameDraw();
         }
 
-        DrawRectangleRec(textBox, LIGHTGRAY);
-        DrawRectangleLines((int)textBox.x, (int)textBox.y,
-                           (int)textBox.width, (int)textBox.height,
-                           mouseOnText ? RED : DARKGRAY);
-        DrawText(buffer, (int)textBox.x + 8, (int)textBox.y + 10, 30,
-                 MAROON);
-
-        if (letterCount < MAX_INPUT_CHARS &&
-            ((framesCounter / 20) % 2) == 0)
+        if (appState != START_GAME)
         {
-            DrawText("_", (int)textBox.x + 8 + MeasureText(buffer, 30),
-                     (int)textBox.y + 10, 30, MAROON);
+            DrawRectangleRec(textBox, LIGHTGRAY);
+            DrawRectangleLines((int)textBox.x, (int)textBox.y,
+                               (int)textBox.width, (int)textBox.height,
+                               mouseOnText ? RED : DARKGRAY);
+            DrawText(buffer, (int)textBox.x + 8, (int)textBox.y + 10, 30,
+                    MAROON);
+
+            if (letterCount < MAX_INPUT_CHARS &&
+                ((framesCounter / 20) % 2) == 0)
+            {
+                DrawText("_", (int)textBox.x + 8 + MeasureText(buffer, 30),
+                         (int)textBox.y + 10, 30, MAROON);
+            }
         }
 
         EndDrawing();

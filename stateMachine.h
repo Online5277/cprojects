@@ -1,6 +1,8 @@
 #ifndef STATE_MACHINE_H
 #define STATE_MACHINE_H
 
-void fishingGame(char *firstName, char *lastName);
+void fishingGameInit(void);
+void fishingGameUpdate(void);
+void fishingGameDraw(void);
 
 #endif

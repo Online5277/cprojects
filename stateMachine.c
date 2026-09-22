@@ -1,8 +1,6 @@
 #include "stateMachine.h"
-#include "sleep.h"
+#include <raylib.h>
 #include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 typedef enum
 {
@@ -10,125 +8,122 @@ typedef enum
     STATE_ATTACH_BAIT,
     STATE_CASTING,
     STATE_REELING,
-    STATE_COOKING,
-    STATE_QUIT
+    STATE_COOKING
 } GameState;
 
-void fishingGame(char *firstName, char *lastName)
+static GameState state;
+static bool rodHasBait;
+static int baitCount;
+static int fishInventory;
+static double fishBitesAt;
+
+void fishingGameInit(void)
 {
-    GameState state = STATE_IDLE;
-    char input[32];
+    state = STATE_IDLE;
+    rodHasBait = false;
+    baitCount = 10;
+    fishInventory = 0;
+    fishBitesAt = 0.0;
+}
 
-    bool rodHasBait = false;
-    int baitCount = 10;
-    int fishInventory = 0;
-    float fishingExperience = 0.0f;
-    float cookingExperience = 0.0f;
-
-    int upper_bound = 3;
-    int lower_bound = 1;
-
-    printf("Hello, %s %s. It's time to fish.\n", firstName, lastName);
-
-    while (state != STATE_QUIT)
+void fishingGameUpdate(void)
+{
+    switch (state)
     {
-        switch (state)
+    case STATE_IDLE:
+        if (IsKeyPressed(KEY_B))
+            state = STATE_ATTACH_BAIT;
+
+        if (IsKeyPressed(KEY_C))
         {
-        case STATE_IDLE:
-            printf("\nYou are idle... Shouldn't you be fishing in a fishing "
-                   "game?\n\n[b] Attach bait to fishing rod\n[c] Cast fishing "
-                   "rod\n[g] Grill some fish\n[q] Quit the game\n");
+            state = STATE_CASTING;
+            if (rodHasBait)
+                fishBitesAt = GetTime() + GetRandomValue(1, 3);
+        }
+        // add settings menu to change name and stuff
+        break;
 
-            fgets(input, sizeof(input), stdin);
-            if (input[0] == 'q')
-            {
-                state = STATE_QUIT;
-                break;
-            }
-            else if (input[0] == 'b')
-            {
-                state = STATE_ATTACH_BAIT;
-            }
-            else if (input[0] == 'g')
-                state = STATE_COOKING;
-            else if (input[0] == 'c')
-            {
-                if (rodHasBait == true)
-                {
-                    state = STATE_CASTING;
-                }
-                else
-                {
-                    printf("You need bait first!\n");
-                    printf("Press Enter to continue.");
-                    getchar();
-                }
-            }
-            break;
-
-        case STATE_ATTACH_BAIT:
-            if (rodHasBait == false)
-            {
-                printf("You have %d worms\nWould you like to attach one to "
-                       "your rod? [y] or [n]: ",
-                       baitCount);
-                fgets(input, sizeof input, stdin);
-
-                if (input[0] == 'y')
-                {
-                    if (baitCount > 0)
-                    {
-                        rodHasBait = true;
-                        baitCount--;
-                        state = STATE_IDLE;
-                    }
-                }
-            }
-            else
-            {
-                printf("You already have bait on your hook!\n");
+    case STATE_ATTACH_BAIT:
+        if (rodHasBait || baitCount == 0)
+        {
+            if (IsKeyPressed(KEY_ENTER))
                 state = STATE_IDLE;
-            }
-            break;
-        case STATE_CASTING:
-            puts("You cast your rod!");
+        }
+        else if (IsKeyPressed(KEY_Y))
+        {
+            rodHasBait = true;
+            baitCount--;
+            state = STATE_IDLE;
+        }
+        else if (IsKeyPressed(KEY_N))
+        {
+            state = STATE_IDLE;
+        }
+        break;
 
-            sleepSeconds((unsigned)(rand() % (upper_bound - lower_bound + 1) +
-                                    lower_bound));
-            puts("A fish is on the line. Press \'enter\' to reel it in!");
-            getchar();
+    case STATE_CASTING:
+        if (!rodHasBait)
+        {
+            if (IsKeyPressed(KEY_ENTER))
+                state = STATE_IDLE;
+        }
+        else if (GetTime() >= fishBitesAt)
+        {
             state = STATE_REELING;
-            break;
-        case STATE_REELING:
-            //            printf("Insert logic for fish minigame here\n");
-            printf("You have caught a fish!\n");
+        }
+        break;
+
+    case STATE_REELING:
+        if (IsKeyPressed(KEY_ENTER))
+        {
             fishInventory++;
-            fishingExperience += 10;
-            printf("Fishing XP: %.1f\n", fishingExperience);
             rodHasBait = false;
             state = STATE_IDLE;
-            break;
-
-        case STATE_COOKING:
-            if (fishInventory == 0)
-                puts("What did you even plan on cooking? Get to fishing!");
-
-            if (fishInventory > 0)
-            {
-                puts("You put the fish on the grill");
-                sleepSeconds(1);
-                puts("It sizzles...");
-                sleepSeconds(1);
-                puts("Done! You have cooked a fish on the grill. [+10 Cooking "
-                     "XP]\n");
-                fishInventory--;
-                cookingExperience += 10;
-                printf("Cooking XP: %.1f\n", cookingExperience);
-            }
-            state = STATE_IDLE;
-            break;
-        case STATE_QUIT:
-            break;
         }
+        break;
+
+    case STATE_COOKING:
+        break;
     }
+}
+
+void fishingGameDraw(void)
+{
+    switch (state)
+    {
+    case STATE_IDLE:
+        DrawText("[B] Attach bait", 50, 150, 24, BLACK);
+        DrawText("[C] Cast rod", 50, 185, 24, BLACK);
+        break;
+
+    case STATE_ATTACH_BAIT:
+        if (rodHasBait)
+            DrawText("Your rod already has bait. Press Enter.", 50, 150, 24,
+                     BLACK);
+        else if (baitCount == 0)
+            DrawText("You have no bait left. Press Enter.", 50, 150, 24,
+                     BLACK);
+        else
+            DrawText("Attach bait? [Y] Yes  [N] No", 50, 150, 24, BLACK);
+        break;
+
+    case STATE_CASTING:
+        if (!rodHasBait)
+            DrawText("Your rod has no bait! Press Enter.", 50, 150, 24,
+                     BLACK);
+        else
+            DrawText("Waiting for a fish...", 50, 150, 24, DARKBLUE);
+        break;
+
+    case STATE_REELING:
+        DrawText("Fish on the line! Press Enter!", 50, 150, 24, RED);
+        break;
+
+    case STATE_COOKING:
+        DrawText("Cooking...", 50, 150, 24, ORANGE);
+        break;
+    }
+
+    DrawText(TextFormat("Bait: %d", baitCount), 600, 30, 20, BLACK);
+    DrawText(TextFormat("Fish: %d", fishInventory), 600, 60, 20, BLACK);
 }
